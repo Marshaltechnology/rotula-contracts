@@ -12,8 +12,8 @@ use soroban_sdk::{
 fn test_initialize() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -37,8 +37,8 @@ fn test_initialize() {
 fn test_double_initialize() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -71,8 +71,8 @@ fn test_double_initialize() {
 fn test_add_member() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -100,8 +100,8 @@ fn test_add_member() {
 fn test_contribute_not_member() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -130,8 +130,8 @@ fn test_contribute_not_member() {
 fn test_contribute_twice_same_cycle_is_rejected() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -162,8 +162,8 @@ fn test_contribute_twice_same_cycle_is_rejected() {
 fn test_contribute_allowed_after_reset() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -197,8 +197,8 @@ fn test_contribute_allowed_after_reset() {
 fn test_events() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -260,8 +260,8 @@ fn test_events() {
 fn test_goalbased_flexible_contributions() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -299,8 +299,8 @@ fn test_goalbased_flexible_contributions() {
 fn test_goalbased_partial_withdrawal() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -338,8 +338,8 @@ fn test_goalbased_partial_withdrawal() {
 fn test_goalbased_over_withdrawal() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -371,8 +371,8 @@ fn test_goalbased_over_withdrawal() {
 fn test_goalbased_locked_until_target() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -404,8 +404,8 @@ fn test_goalbased_locked_until_target() {
 fn test_remove_member_no_contribution() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -442,8 +442,8 @@ fn test_remove_member_no_contribution() {
 fn test_remove_member_with_contribution_refund() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -492,8 +492,8 @@ fn test_remove_member_with_contribution_refund() {
 fn test_remove_member_after_payout_panics() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -531,8 +531,8 @@ fn test_remove_member_after_payout_panics() {
 fn test_remove_member_adjusts_cycle_count() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -601,8 +601,8 @@ fn test_remove_member_adjusts_cycle_count() {
 fn test_remove_last_member_clears_cycle_count() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -647,8 +647,8 @@ fn test_remove_last_member_clears_cycle_count() {
 fn test_deterministic_payout_order() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -721,8 +721,8 @@ fn test_deterministic_payout_order() {
 fn test_queue_enforced_payout_order() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -787,8 +787,8 @@ fn test_queue_enforced_payout_order() {
 fn test_cycle_resets_and_starts_again() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -867,8 +867,8 @@ fn test_cycle_resets_and_starts_again() {
 fn test_initialize_with_negative_amount_fails() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -890,8 +890,8 @@ fn test_initialize_with_negative_amount_fails() {
 fn test_initialize_with_zero_amount_fails() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -913,8 +913,8 @@ fn test_initialize_with_zero_amount_fails() {
 fn test_initialize_with_exceeding_max_amount_fails() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -936,8 +936,8 @@ fn test_initialize_with_exceeding_max_amount_fails() {
 fn test_payout_pool_size_overflow_panics() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -974,8 +974,8 @@ fn test_payout_pool_size_overflow_panics() {
 fn test_payout_wrong_recipient_auth_fails() {
     let env = Env::default();
 
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -1024,7 +1024,7 @@ fn test_payout_wrong_recipient_auth_fails() {
 //
 // `MaliciousToken` is a minimal mock that implements just enough of the token
 // interface (`balance` and `transfer`) for `token::Client` to invoke it from
-// inside `KoloSavingsContract`. Its `transfer` function is where a real
+// inside `RotulaSavingsContract`. Its `transfer` function is where a real
 // malicious or unusually-implemented token could try to "call back" into the
 // savings contract mid-payout. We use it to:
 //
@@ -1046,7 +1046,7 @@ fn test_payout_wrong_recipient_auth_fails() {
 #[contracttype]
 #[derive(Clone)]
 enum MalKey {
-    Kolo,
+    Rotula,
     Mode,
     ObservedHasPayout,
 }
@@ -1057,8 +1057,8 @@ pub struct MaliciousToken;
 #[contractimpl]
 impl MaliciousToken {
     /// Configure which savings contract to target. Starts in "observe" mode (0).
-    pub fn init(env: Env, kolo: Address) {
-        env.storage().instance().set(&MalKey::Kolo, &kolo);
+    pub fn init(env: Env, rotula: Address) {
+        env.storage().instance().set(&MalKey::Rotula, &rotula);
         env.storage().instance().set(&MalKey::Mode, &0u32);
     }
 
@@ -1078,29 +1078,29 @@ impl MaliciousToken {
     pub fn balance(env: Env, _id: Address) -> i128 {
         let mode: u32 = env.storage().instance().get(&MalKey::Mode).unwrap_or(0);
         if mode == 2 {
-            let kolo: Address = env.storage().instance().get(&MalKey::Kolo).unwrap();
-            let client = KoloSavingsContractClient::new(&env, &kolo);
+            let rotula: Address = env.storage().instance().get(&MalKey::Rotula).unwrap();
+            let client = RotulaSavingsContractClient::new(&env, &rotula);
             // Attempt reentrancy from inside balance(), before transfer() is ever reached.
-            client.payout(&kolo); // recipient doesn't matter — should never get this far
+            client.payout(&rotula); // recipient doesn't matter — should never get this far
         }
         i128::MAX
     }
 
-    /// Called by KoloSavingsContract via `token::Client::transfer`. This is the
+    /// Called by RotulaSavingsContract via `token::Client::transfer`. This is the
     /// "interaction" step where a malicious token gets a chance to re-enter.
     pub fn transfer(env: Env, _from: Address, to: Address, _amount: i128) {
-        let kolo: Address = env.storage().instance().get(&MalKey::Kolo).unwrap();
+        let rotula: Address = env.storage().instance().get(&MalKey::Rotula).unwrap();
         let mode: u32 = env.storage().instance().get(&MalKey::Mode).unwrap_or(0);
 
         if mode == 1 {
             // Attack: try to trigger a second payout to the same recipient
             // while the outer payout() call is still mid-flight.
-            let client = KoloSavingsContractClient::new(&env, &kolo);
+            let client = RotulaSavingsContractClient::new(&env, &rotula);
             client.payout(&to);
         } else {
             // Observe: read back whether payout()'s effects were already
             // applied by the time this callback runs.
-            let already_marked: bool = env.as_contract(&kolo, || {
+            let already_marked: bool = env.as_contract(&rotula, || {
                 let state: Option<MemberState> =
                     env.storage().persistent().get(&DataKey::Member(to.clone()));
                 state.map(|s| s.has_received_payout).unwrap_or(false)
@@ -1116,12 +1116,12 @@ fn setup_with_malicious_token(
     env: &Env,
 ) -> (
     Address,
-    KoloSavingsContractClient<'_>,
+    RotulaSavingsContractClient<'_>,
     Address,
     MaliciousTokenClient<'_>,
 ) {
-    let kolo_id = env.register_contract(None, KoloSavingsContract);
-    let kolo_client = KoloSavingsContractClient::new(env, &kolo_id);
+    let rotula_id = env.register_contract(None, RotulaSavingsContract);
+    let rotula_client = RotulaSavingsContractClient::new(env, &rotula_id);
 
     let mal_token_id = env.register_contract(None, MaliciousToken);
     let mal_client = MaliciousTokenClient::new(env, &mal_token_id);
@@ -1129,7 +1129,7 @@ fn setup_with_malicious_token(
     let admin = Address::generate(env);
     let name = String::from_str(env, "Test Group");
 
-    kolo_client.initialize(
+    rotula_client.initialize(
         &admin,
         &mal_token_id,
         &name,
@@ -1140,7 +1140,7 @@ fn setup_with_malicious_token(
         &None,
     );
 
-    (kolo_id, kolo_client, mal_token_id, mal_client)
+    (rotula_id, rotula_client, mal_token_id, mal_client)
 }
 
 /// Requirement: verify the CEI pattern is implemented — state (has_received_payout,
@@ -1151,18 +1151,18 @@ fn test_cei_effects_committed_before_external_transfer() {
     let env = Env::default();
     env.mock_all_auths();
 
-    let (kolo_id, kolo_client, _mal_token_id, mal_client) = setup_with_malicious_token(&env);
+    let (rotula_id, rotula_client, _mal_token_id, mal_client) = setup_with_malicious_token(&env);
 
     let member = Address::generate(&env);
-    kolo_client.add_member(&member);
+    rotula_client.add_member(&member);
 
-    mal_client.init(&kolo_id);
+    mal_client.init(&rotula_id);
     mal_client.set_mode(&0u32);
 
-    kolo_client.contribute(&member, &1000);
+    rotula_client.contribute(&member, &1000);
     assert!(!mal_client.get_observed()); // contribute's own transfer targets the contract, not a member
 
-    kolo_client.payout(&member);
+    rotula_client.payout(&member);
 
     // The MaliciousToken observed, from *inside* the transfer() callback, that
     // has_received_payout(member) was already true — proving effects were
@@ -1178,16 +1178,16 @@ fn test_reentrant_payout_call_is_blocked() {
     let env = Env::default();
     env.mock_all_auths();
 
-    let (kolo_id, kolo_client, _mal_token_id, mal_client) = setup_with_malicious_token(&env);
+    let (rotula_id, rotula_client, _mal_token_id, mal_client) = setup_with_malicious_token(&env);
 
     let member = Address::generate(&env);
-    kolo_client.add_member(&member);
+    rotula_client.add_member(&member);
 
-    mal_client.init(&kolo_id);
+    mal_client.init(&rotula_id);
 
     // Contribute first while still in observe mode (mode 0) so the deposit
     // succeeds normally.
-    kolo_client.contribute(&member, &1000);
+    rotula_client.contribute(&member, &1000);
 
     // Now arm the attack: the next transfer() call (triggered by payout())
     // will try to call payout() again for the same recipient.
@@ -1195,7 +1195,7 @@ fn test_reentrant_payout_call_is_blocked() {
 
     // This should panic with "Reentrancy detected" because the guard set at
     // the top of payout() is still held when the reentrant call happens.
-    kolo_client.payout(&member);
+    rotula_client.payout(&member);
 }
 
 /// Requirement: contribute() must also refuse to run if a payout is (somehow)
@@ -1205,8 +1205,8 @@ fn test_reentrant_payout_call_is_blocked() {
 fn test_contribute_blocked_while_payout_executing() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -1244,8 +1244,8 @@ fn test_contribute_blocked_while_payout_executing() {
 fn test_pause_blocks_contribute() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -1276,24 +1276,24 @@ fn test_pause_blocks_contribute() {
 fn test_reentrant_payout_call_via_balance_is_blocked() {
     let env = Env::default();
     env.mock_all_auths();
-    let (kolo_id, kolo_client, _mal_token_id, mal_client) = setup_with_malicious_token(&env);
+    let (rotula_id, rotula_client, _mal_token_id, mal_client) = setup_with_malicious_token(&env);
 
     let member = Address::generate(&env);
-    kolo_client.add_member(&member);
-    mal_client.init(&kolo_id);
+    rotula_client.add_member(&member);
+    mal_client.init(&rotula_id);
 
-    kolo_client.contribute(&member, &1000);
+    rotula_client.contribute(&member, &1000);
 
     mal_client.set_mode(&2u32); // reenter via balance(), not transfer()
-    kolo_client.payout(&member);
+    rotula_client.payout(&member);
 }
 
 #[test]
 fn test_unpause_allows_contribute() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -1327,8 +1327,8 @@ fn test_unpause_allows_contribute() {
 fn test_non_admin_cannot_pause() {
     let env = Env::default();
 
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token = Address::generate(&env);
@@ -1363,8 +1363,8 @@ fn test_non_admin_cannot_pause() {
 fn test_emergency_withdraw_full_flow() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -1431,8 +1431,8 @@ fn test_emergency_withdraw_full_flow() {
 fn test_emergency_withdraw_twice_panics() {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, KoloSavingsContract);
-    let client = KoloSavingsContractClient::new(&env, &contract_id);
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
     let token_admin = Address::generate(&env);
@@ -1459,4 +1459,66 @@ fn test_emergency_withdraw_twice_panics() {
     client.emergency_withdraw(&member);
     // Second call should panic — no contribution left this cycle.
     client.emergency_withdraw(&member);
+}
+
+#[test]
+#[should_panic(expected = "Must contribute the exact amount")]
+fn test_rotational_contribute_wrong_amount_rejected() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let token = env.register_stellar_asset_contract(token_admin.clone());
+    let token_client = token::StellarAssetClient::new(&env, &token);
+
+    client.initialize(
+        &admin,
+        &token,
+        &String::from_str(&env, "Test Group"),
+        &1000i128,
+        &GroupType::Rotational,
+        &None,
+        &false,
+        &None,
+    );
+
+    let member = Address::generate(&env);
+    client.add_member(&member);
+    token_client.mint(&member, &5000);
+
+    client.contribute(&member, &500);
+}
+
+#[test]
+#[should_panic(expected = "Amount must be positive")]
+fn test_goalbased_zero_contribution_rejected() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let contract_id = env.register_contract(None, RotulaSavingsContract);
+    let client = RotulaSavingsContractClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let token = env.register_stellar_asset_contract(token_admin.clone());
+    let token_client = token::StellarAssetClient::new(&env, &token);
+
+    client.initialize(
+        &admin,
+        &token,
+        &String::from_str(&env, "Goal Group"),
+        &1000i128,
+        &GroupType::GoalBased,
+        &None,
+        &false,
+        &None,
+    );
+
+    let member = Address::generate(&env);
+    client.add_member(&member);
+    token_client.mint(&member, &5000);
+
+    client.contribute(&member, &0);
 }
