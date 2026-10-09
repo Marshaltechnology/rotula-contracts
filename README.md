@@ -1,33 +1,51 @@
-# Kolo Soroban Savings Contracts
+# Kolo Soroban Contracts — Savings rules on Stellar
 
-**Kolo is building community savings on Stellar.** This repository contains the Rust Soroban contract for savings groups. Stellar provides the asset and settlement layer; Soroban holds group state and enforces the rules for contributions, ordered payouts, withdrawals, and cycle changes.
+> Soroban contract experiments for transparent community savings groups.
 
-Kolo's product is designed for communities that already save together through Ajo/Esusu-style circles. A group agrees on a contribution amount and membership, members contribute the selected Stellar asset, and the contract enforces a deterministic payout rotation. Goal-based groups provide a separate savings mode with target and withdrawal controls.
+Kolo is being built for communities that already save together through Ajo, Esusu, and other rotating savings circles. This repository contains the Rust Soroban contract that models the on-chain side of that idea: a group, its members, a configured Stellar token, contribution state, and the rules governing payouts or goal-based withdrawals.
 
-## Kolo repositories
+Stellar is Kolo's intended settlement network. Soroban makes it possible to represent group rules as contract logic and to emit events as state changes. The contract does not replace the WhatsApp experience or Kolo's backend; those systems must still create groups, coordinate members, authorize invocations, submit transactions, and communicate confirmed outcomes.
 
-- [Frontend](https://github.com/Stellar-Kolo/kolo-frontend) — member and admin web experience.
-- [Backend](https://github.com/Stellar-Kolo/kolo-backend) — WhatsApp, Stellar, and Soroban orchestration.
-- [Soroban contracts](https://github.com/Stellar-Kolo/kolo-contracts) — this Rust contract project.
+**Status:** contract code and tests are under active development. This is not a deployed savings product or a production-ready custody system. The backend integration is still being aligned with the current contract interface. Do not use real funds.
 
-## Contract capabilities
+## Why Soroban for community savings
 
-- Initialize a group with an administrator, Stellar token contract, name, contribution amount, and group configuration.
-- Add and remove members with administrator authorization.
-- Accept member-authorized contributions and transfer the configured token into the contract.
-- In rotational groups, require the exact configured contribution amount and reject a second contribution from a member during the same cycle.
-- Pay the next member in contract member order. The administrator authorizes the payout, and the contract checks the expected recipient and available pool balance.
-- Withdraw savings in GoalBased groups, with an optional target lock. Rotational groups cannot use this withdrawal method.
-- Pause the contract, allow a member to recover their current-cycle contribution while paused, and resume operations through administrator authorization.
-- Emit events for initialization, membership changes, contributions, payouts, withdrawals, and cycle operations.
+Rotating savings groups depend on clear rules: who can join, how much members contribute, whose turn comes next, and what happens if a group pauses. Kolo explores encoding a subset of those rules in a Soroban contract so that token movement and group state can be checked on Stellar instead of relying only on an off-chain database.
 
-## Stellar asset units
+```text
+WhatsApp conversations        Kolo backend               Stellar / Soroban
+group coordination    ─────►   member + group records ──► configured token
+reminders and help              authorization             contract state/events
+                                RPC + confirmation          contributions/payouts
+```
 
-The contract accepts amounts as `i128` integers in the token's smallest units. It does not assume a particular asset or decimal count: the token contract is supplied during initialization. The calling application must choose the intended Stellar asset and convert display amounts to that asset's base units consistently. Kolo's product brief targets USDC, while some current backend flows still refer to XLM; confirm the configured asset and conversion rules before deployment.
+The intended savings asset is **USDC on Stellar**, but this contract does not hard-code USDC. Initialization receives a token contract address, and all amounts are integer base units. The calling application must select the correct asset contract and perform exact decimal conversion. Some backend payment and command flows currently use XLM, so the full system's asset configuration is not yet consistent.
 
-## Contract interface
+## Contract behavior
 
-The primary exported operations are:
+The `KoloSavingsContract` supports two group types:
+
+| Group type | Contribution behavior | Outgoing funds |
+| --- | --- | --- |
+| `Rotational` | A member must contribute the configured amount once per cycle. The member count is frozen on the first contribution in a cycle. | An administrator-authorized call pays the next member in contract order, using the configured contribution amount multiplied by the frozen member count. |
+| `GoalBased` | A member-authorized contribution may be any positive amount. | A member can withdraw from their recorded savings, subject to available contract tokens and any configured target lock. Rotational payout is unavailable. |
+
+Additional controls include:
+
+- Administrator-authorized initialization and membership changes.
+- Member authorization for contributions and withdrawals.
+- Expected-recipient checking for rotational payouts.
+- Pausing and resuming contract operations, plus a paused-member recovery path for a contribution made in the current cycle.
+- Cycle and rotation reset operations controlled by the administrator.
+- Events for initialization, membership, contributions, payouts, withdrawals, pause changes, and cycle operations.
+- Storage time-to-live extension for group and member state.
+- A payout reentrancy guard and checks-effects-interactions ordering around token transfers.
+
+The contract enforces rules on an invocation; it does not run on a wall-clock schedule. `expected_cycle_days` informs the stored cycle-length setting used for TTL calculations, but the contract does not automatically trigger contributions, payouts, or resets. The application coordinates those actions.
+
+## Interface
+
+Primary exported operations:
 
 ```text
 initialize(
@@ -56,9 +74,19 @@ get_contribution(member: Address) -> i128
 has_received_payout(member: Address) -> bool
 ```
 
-`GroupType` is `Rotational` or `GoalBased`. Initialization and state-changing methods require the appropriate Soroban authorization. The group administrator must explicitly add members; initialization does not enroll them automatically.
+`GroupType` is `Rotational` or `GoalBased`. Initialization starts with no members; the administrator must add them. State-changing operations require the corresponding Soroban authorization. A successful contract invocation is still only one part of a complete product flow: the application must submit it to the intended network, wait for confirmation, and reconcile the resulting state.
 
-For a rotational group, the contract freezes the member count when the first contribution of a cycle arrives. A payout transfers `contribution_amount × frozen_member_count` to the next member in the contract's member list. After all recipients have been paid, the application coordinates `reset_cycle()` and `reset_rotation()` to start a new contribution cycle and rotation. These calls are administrator-authorized; the contract does not schedule them by itself.
+## Rotational cycle notes
+
+The first contribution in a cycle freezes the current member count. Each member can contribute once in that cycle. The administrator then calls `payout(expected_recipient)` in the contract's deterministic member order. The contract computes the payout as:
+
+```text
+configured contribution amount × frozen member count
+```
+
+The contract checks that the next expected member matches the requested recipient and that the contract's token balance covers that payout. It does not itself schedule payouts or initiate a new rotation. After the payout sequence, the application must coordinate the administrator-authorized `reset_cycle()` and `reset_rotation()` calls at the appropriate time.
+
+Because the contract's pool accounting, contribution readiness, and backend payout lifecycle must work together, treat these rules as code under development. Review and test the full lifecycle before deploying a public instance.
 
 ## Build and test
 
@@ -68,24 +96,32 @@ Requires Rust and the Wasm target:
 rustup target add wasm32-unknown-unknown
 ```
 
-From `contracts/`:
+From the `contracts/` directory:
 
 ```bash
 cargo test
 cargo build --target wasm32-unknown-unknown --release
 ```
 
-The release Wasm artifact is written under `contracts/target/wasm32-unknown-unknown/release/`.
+The release Wasm artifact is written to `contracts/target/wasm32-unknown-unknown/release/`.
 
-## Deployment and integration
+## Integration with Kolo
 
-The application is responsible for deploying the Wasm, creating a contract instance, initializing it with the exact ABI above, adding authorized members, and submitting signed invocations through a Soroban RPC endpoint. The backend integration is still being aligned with this contract interface; a successful local contract test does not by itself mean the complete Kolo savings flow is deployed or production-ready.
+The [Kolo backend](https://github.com/Stellar-Kolo/kolo-backend) is responsible for loading the compiled Wasm, deploying contract instances, constructing and simulating Soroban transactions, obtaining authorization, submitting through Soroban RPC, and waiting for confirmation. It also needs to keep contract state and PostgreSQL records reconcilable. The [Kolo frontend](https://github.com/Stellar-Kolo/kolo-frontend) is the web companion; the planned primary member experience is WhatsApp-first.
 
-Use Stellar Testnet for development. Review token address, decimal conversion, authorization, storage TTL, payout order, and emergency behavior before any public-network deployment. Never commit secret keys or use production credentials in tests.
+Integration is still in progress. Before relying on a deployment, align the backend's ABI and membership lifecycle with this interface and verify asset address, issuer, amount precision, transaction authorization, payout readiness, errors, and recovery behavior together.
+
+## Security and network use
+
+- Use Stellar Testnet for development. Never include a secret key or phrase in source, logs, issues, or commits.
+- Verify the token contract address and asset issuer; an asset code alone does not identify a Stellar asset.
+- Confirm all amounts use the configured token's smallest units and stay within integer bounds.
+- Review administrator powers, membership changes, payout readiness, pause/recovery behavior, and Soroban storage TTL before any public deployment.
+- Contract tests do not establish that the integrated application is safe for production funds.
 
 ## Contributing
 
-Open an issue before larger changes. Contract changes should include Soroban tests for success, authorization failures, invalid amounts, cycle boundaries, and token-transfer edge cases. Changes that affect pooled funds or payout ordering need careful review.
+Open an issue before a larger change. Contract changes should include tests for successful behavior and relevant authorization failures, invalid amounts, membership changes, cycle boundaries, pause/recovery, and token-transfer edge cases. Changes affecting pooled funds or payout order need careful review.
 
 ## License
 
