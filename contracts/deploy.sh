@@ -55,14 +55,14 @@ done
 echo "============================================="
 echo "Building Kolo Smart Contract..."
 echo "============================================="
-cargo build --target wasm32-unknown-unknown --release
+cargo build --target wasm32v1-none --release
 
 echo ""
 echo "============================================="
 echo "Optimizing WASM Binary..."
 echo "============================================="
 # Run the optimization command as requested in the acceptance criteria
-"$CLI" contract optimize --wasm target/wasm32-unknown-unknown/release/kolo_savings_group.wasm
+"$CLI" contract optimize --wasm target/wasm32v1-none/release/kolo_savings_group.wasm
 
 echo ""
 echo "============================================="
@@ -77,7 +77,7 @@ fi
 
 echo "Deploying contract with identity '$SOURCE_ACCOUNT'..."
 CONTRACT_ID=$("$CLI" contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/kolo_savings_group.optimized.wasm \
+  --wasm target/wasm32v1-none/release/kolo_savings_group.optimized.wasm \
   --source "$SOURCE_ACCOUNT" \
   --network "$NETWORK")
 

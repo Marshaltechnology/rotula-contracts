@@ -6,7 +6,15 @@ Kolo is being built for communities that already save together through Ajo, Esus
 
 Stellar is Kolo's intended settlement network. Soroban makes it possible to represent group rules as contract logic and to emit events as state changes. The contract does not replace the WhatsApp experience or Kolo's backend; those systems must still create groups, coordinate members, authorize invocations, submit transactions, and communicate confirmed outcomes.
 
-**Status:** contract code and tests are under active development. This is not a deployed savings product or a production-ready custody system. The backend integration is still being aligned with the current contract interface. Do not use real funds.
+**Status:** a version of the contract code is deployed to Stellar Testnet for review. No savings-group instance has been initialized, and no token has been deposited. The backend integration is still being aligned with the current contract interface. This is not a production-ready custody system; do not use real funds.
+
+### Testnet deployment
+
+- **Network:** Stellar Testnet
+- **Contract ID:** [`CBQCB6KIXAPDPKGNZFR3KSBBJNEJRFN3MAQL7S46JGFA5I22AUL4OPYL`](https://stellar.expert/explorer/testnet/contract/CBQCB6KIXAPDPKGNZFR3KSBBJNEJRFN3MAQL7S46JGFA5I22AUL4OPYL)
+- **Deployment transaction:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/1d539b2c8f345601a54e039779a46b4fa14ccfee0e553884c2531bc2caec6f74)
+
+This deploys the contract code only. It does not create or configure a savings group, select a token, enroll members, or make the contract ready to receive funds. Testnet assets have no real-world value.
 
 ## Why Soroban for community savings
 
@@ -93,17 +101,17 @@ Because the contract's pool accounting, contribution readiness, and backend payo
 Requires Rust and the Wasm target:
 
 ```bash
-rustup target add wasm32-unknown-unknown
+rustup target add wasm32v1-none
 ```
 
 From the `contracts/` directory:
 
 ```bash
 cargo test
-cargo build --target wasm32-unknown-unknown --release
+cargo build --target wasm32v1-none --release
 ```
 
-The release Wasm artifact is written to `contracts/target/wasm32-unknown-unknown/release/`.
+The release Wasm artifact is written to `contracts/target/wasm32v1-none/release/`. This target is required by Soroban SDK 27 with current Rust toolchains; `wasm32-unknown-unknown` is rejected by the SDK on newer Rust versions.
 
 ## Integration with Kolo
 
