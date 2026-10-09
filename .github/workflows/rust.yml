@@ -1,4 +1,4 @@
-name: Kolo Backend CI
+name: Rotula Contracts CI
 
 permissions:
   contents: read
@@ -23,18 +23,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           components: rustfmt, clippy
           targets: wasm32v1-none
 
       - name: Cache Cargo dependencies
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: ${{ env.WORKING_DIR }}
 
@@ -54,10 +54,10 @@ jobs:
         run: cargo build --target wasm32v1-none --release
 
       - name: Upload WASM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: kolo-savings-group-wasm
-          path: ${{ env.WORKING_DIR }}/target/wasm32v1-none/release/kolo_savings_group.wasm
+          name: rotula-savings-group-wasm
+          path: ${{ env.WORKING_DIR }}/target/wasm32v1-none/release/rotula_savings_group.wasm
           retention-days: 14
 
   deploy:
@@ -70,17 +70,17 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           targets: wasm32v1-none
 
       - name: Cache Cargo dependencies
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: ${{ env.WORKING_DIR }}
 
@@ -96,14 +96,14 @@ jobs:
             --release
           cargo install wasm-opt --locked
           wasm-opt \
-            target/wasm32v1-none/release/kolo_savings_group.wasm \
-            -o target/wasm32v1-none/release/kolo_savings_group.optimized.wasm
+            target/wasm32v1-none/release/rotula_savings_group.wasm \
+            -o target/wasm32v1-none/release/rotula_savings_group.optimized.wasm
 
       - name: Deploy contract to testnet
         env:
           STELLAR_SOURCE_ACCOUNT: ${{ secrets.STELLAR_DEPLOYER_KEY }}
         run: |
           stellar contract deploy \
-            --wasm target/wasm32v1-none/release/kolo_savings_group.optimized.wasm \
+            --wasm target/wasm32v1-none/release/rotula_savings_group.optimized.wasm \
             --source-account "$STELLAR_SOURCE_ACCOUNT" \
             --network testnet
