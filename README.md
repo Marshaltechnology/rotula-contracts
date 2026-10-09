@@ -1,95 +1,92 @@
-# Kolo Savings Platform - Smart Contract
+# Kolo Soroban Savings Contracts
 
-This repository contains the core **Soroban Smart Contract** for the Kolo Savings Platform. Kolo is designed to facilitate Ajo/Esusu (rotational savings) directly on the Stellar blockchain, providing a trustless, transparent, and secure environment for community savings groups.
- 
-## Overview
+**Kolo is building community savings on Stellar.** This repository contains the Rust Soroban contract for savings groups. Stellar provides the asset and settlement layer; Soroban holds group state and enforces the rules for contributions, ordered payouts, withdrawals, and cycle changes.
 
-The smart contract ensures strict adherence to rotational savings rules:
-- **Fixed Payouts:** Enforces that payouts are exactly equal to the `contribution_amount * number_of_members`.
-- **Fair Rotations:** Tracks which members have received payouts to guarantee each member is paid exactly once per cycle.
-- **Trustless Execution:** Admin cannot arbitrarily withdraw funds or change payout amounts.
+Kolo's product is designed for communities that already save together through Ajo/Esusu-style circles. A group agrees on a contribution amount and membership, members contribute the selected Stellar asset, and the contract enforces a deterministic payout rotation. Goal-based groups provide a separate savings mode with target and withdrawal controls.
 
-## Core Features
+## Kolo repositories
 
-1. **Group Initialization**
-   - Initializes a new savings group with a designated admin, a specific token (e.g., USDC), a group name, and a fixed contribution amount.
-   
-2. **Member Management**
-   - The admin can add members to the group. Only registered members can contribute or receive payouts.
+- [Frontend](https://github.com/Stellar-Kolo/kolo-frontend) — member and admin web experience.
+- [Backend](https://github.com/Stellar-Kolo/kolo-backend) — WhatsApp, Stellar, and Soroban orchestration.
+- [Soroban contracts](https://github.com/Stellar-Kolo/kolo-contracts) — this Rust contract project.
 
-3. **Contributions**
-   - Members contribute the exact fixed amount to the smart contract pool.
+## Contract capabilities
 
-4. **Strict Payouts**
-   - The admin triggers the payout to a specific member.
-   - The contract verifies the recipient is a member, has not received a payout this cycle, and that the pool has sufficient funds.
-   - The exact pooled amount is securely transferred to the recipient.
+- Initialize a group with an administrator, Stellar token contract, name, contribution amount, and group configuration.
+- Add and remove members with administrator authorization.
+- Accept member-authorized contributions and transfer the configured token into the contract.
+- In rotational groups, require the exact configured contribution amount and reject a second contribution from a member during the same cycle.
+- Pay the next member in contract member order. The administrator authorizes the payout, and the contract checks the expected recipient and available pool balance.
+- Withdraw savings in GoalBased groups, with an optional target lock. Rotational groups cannot use this withdrawal method.
+- Pause the contract, allow a member to recover their current-cycle contribution while paused, and resume operations through administrator authorization.
+- Emit events for initialization, membership changes, contributions, payouts, withdrawals, and cycle operations.
 
-5. **Cycle Reset**
-   - Once a cycle is complete, the admin can reset the cycle, allowing members to receive payouts in the next rotation.
+## Stellar asset units
 
-## Prerequisites
+The contract accepts amounts as `i128` integers in the token's smallest units. It does not assume a particular asset or decimal count: the token contract is supplied during initialization. The calling application must choose the intended Stellar asset and convert display amounts to that asset's base units consistently. Kolo's product brief targets USDC, while some current backend flows still refer to XLM; confirm the configured asset and conversion rules before deployment.
 
-To build and test the contract, you need to install Rust and the Soroban CLI:
+## Contract interface
 
-1. Install Rust:
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   ```
-2. Add the WebAssembly target:
-   ```bash
-   rustup target add wasm32-unknown-unknown
-   ```
-3. Install the Soroban CLI:
-   ```bash
-   cargo install --locked soroban-cli
-   ```
+The primary exported operations are:
 
-## Pre-commit Hooks
-
-To ensure code quality, this repository uses pre-commit hooks to automatically format and lint Rust code before committing.
-
-To install the hooks, run:
-
-```bash
-pip install pre-commit
-pre-commit install
+```text
+initialize(
+  admin: Address,
+  token: Address,
+  name: String,
+  contribution_amount: i128,
+  group_type: GroupType,
+  target_amount: Option<i128>,
+  lock_until_target: bool,
+  expected_cycle_days: Option<u32>
+)
+add_member(new_member: Address)
+remove_member(member_to_remove: Address)
+contribute(member: Address, amount: i128)
+payout(expected_recipient: Address)
+get_next_payout_recipient() -> Address
+withdraw_savings(member: Address, amount: i128)
+emergency_withdraw(member: Address)
+pause()
+unpause()
+reset_cycle()
+reset_rotation()
+get_balance() -> i128
+get_contribution(member: Address) -> i128
+has_received_payout(member: Address) -> bool
 ```
 
-## Build
+`GroupType` is `Rotational` or `GoalBased`. Initialization and state-changing methods require the appropriate Soroban authorization. The group administrator must explicitly add members; initialization does not enroll them automatically.
 
-Compile the smart contract into a WebAssembly (`.wasm`) file:
+For a rotational group, the contract freezes the member count when the first contribution of a cycle arrives. A payout transfers `contribution_amount × frozen_member_count` to the next member in the contract's member list. After all recipients have been paid, the application coordinates `reset_cycle()` and `reset_rotation()` to start a new contribution cycle and rotation. These calls are administrator-authorized; the contract does not schedule them by itself.
+
+## Build and test
+
+Requires Rust and the Wasm target:
 
 ```bash
-cd contracts
+rustup target add wasm32-unknown-unknown
+```
+
+From `contracts/`:
+
+```bash
+cargo test
 cargo build --target wasm32-unknown-unknown --release
 ```
 
-The compiled contract will be located at `contracts/target/wasm32-unknown-unknown/release/kolo_savings_group.wasm`.
+The release Wasm artifact is written under `contracts/target/wasm32-unknown-unknown/release/`.
 
-## Test
+## Deployment and integration
 
-Run the comprehensive Rust unit tests to verify the strict Ajo/Esusu logic:
+The application is responsible for deploying the Wasm, creating a contract instance, initializing it with the exact ABI above, adding authorized members, and submitting signed invocations through a Soroban RPC endpoint. The backend integration is still being aligned with this contract interface; a successful local contract test does not by itself mean the complete Kolo savings flow is deployed or production-ready.
 
-```bash
-cd contracts
-cargo test
-```
+Use Stellar Testnet for development. Review token address, decimal conversion, authorization, storage TTL, payout order, and emergency behavior before any public-network deployment. Never commit secret keys or use production credentials in tests.
 
-## Contract Methods
+## Contributing
 
-### Write Operations
-- `initialize(admin: Address, token: Address, name: String, contribution_amount: i128)`
-- `add_member(new_member: Address)` (Requires Admin Auth)
-- `contribute(member: Address, amount: i128)` (Requires Member Auth)
-- `payout(recipient: Address)` (Requires Admin Auth)
-- `reset_cycle()` (Requires Admin Auth)
-
-### Read Operations
-- `get_balance() -> i128`
-- `get_contribution(member: Address) -> i128`
-- `has_received_payout(member: Address) -> bool`
+Open an issue before larger changes. Contract changes should include Soroban tests for success, authorization failures, invalid amounts, cycle boundaries, and token-transfer edge cases. Changes that affect pooled funds or payout ordering need careful review.
 
 ## License
 
-MIT License
+MIT
