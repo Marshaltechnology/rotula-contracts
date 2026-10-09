@@ -1,12 +1,43 @@
-# Kolo Soroban Contracts — Savings rules on Stellar
+# Rotula Soroban Contracts — Savings rules on Stellar
 
 > Soroban contract experiments for transparent community savings groups.
 
-Kolo is being built for communities that already save together through Ajo, Esusu, and other rotating savings circles. This repository contains the Rust Soroban contract that models the on-chain side of that idea: a group, its members, a configured Stellar token, contribution state, and the rules governing payouts or goal-based withdrawals.
+[![CI](https://github.com/Rotula-Labs/rotula-contracts/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/Rotula-Labs/rotula-contracts/actions/workflows/rust.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Stellar](https://img.shields.io/badge/Stellar-Soroban-%237b2ff7?logo=stellar)](https://developers.stellar.org)
+[![Rust](https://img.shields.io/badge/Rust-stable-%23000000?logo=rust)](https://www.rust-lang.org)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-Stellar is Kolo's intended settlement network. Soroban makes it possible to represent group rules as contract logic and to emit events as state changes. The contract does not replace the WhatsApp experience or Kolo's backend; those systems must still create groups, coordinate members, authorize invocations, submit transactions, and communicate confirmed outcomes.
+Rotula is being built for communities that already save together through Ajo, Esusu, and other rotating savings circles. This repository contains the Rust Soroban contract that models the on-chain side of that idea: a group, its members, a configured Stellar token, contribution state, and the rules governing payouts or goal-based withdrawals.
+
+Stellar is Rotula's intended settlement network. Soroban makes it possible to represent group rules as contract logic and to emit events as state changes. The contract does not replace the WhatsApp experience or Rotula's backend; those systems must still create groups, coordinate members, authorize invocations, submit transactions, and communicate confirmed outcomes.
 
 **Status:** a version of the contract code is deployed to Stellar Testnet for review. No savings-group instance has been initialized, and no token has been deposited. The backend integration is still being aligned with the current contract interface. This is not a production-ready custody system; do not use real funds.
+
+## How it uses Stellar
+
+This repository is the on-chain half of Rotula, and everything in it is Stellar-native:
+
+- **Soroban smart contract** compiled to `wasm32v1-none` (SDK 27) and deployed to Stellar Testnet.
+- **SEP-41 token movement** through a configured Stellar token contract; USDC on Stellar is the intended asset, but the token address is an initialization argument rather than a hard-coded constant.
+- **Soroban authorization** (`require_auth`) gates every membership change, contribution, payout, and withdrawal; there is no off-chain signature that can move pooled funds.
+- **Contract events** for initialization, membership, contributions, payouts, withdrawals, pause changes, and cycle operations, readable by any Stellar RPC client.
+- **Soroban storage TTL** is extended for group and member state so long-running groups do not archive mid-cycle.
+
+## Table of Contents
+
+- [How it uses Stellar](#how-it-uses-stellar)
+- [Testnet deployment](#testnet-deployment)
+- [Why Soroban for community savings](#why-soroban-for-community-savings)
+- [Contract behavior](#contract-behavior)
+- [Interface](#interface)
+- [Rotational cycle notes](#rotational-cycle-notes)
+- [Prerequisites](#prerequisites)
+- [Build and test](#build-and-test)
+- [Integration with Rotula](#integration-with-rotula)
+- [Security and network use](#security-and-network-use)
+- [Contributing](#contributing)
+- [License](#license)
 
 ### Testnet deployment
 
@@ -18,10 +49,10 @@ This deploys the contract code only. It does not create or configure a savings g
 
 ## Why Soroban for community savings
 
-Rotating savings groups depend on clear rules: who can join, how much members contribute, whose turn comes next, and what happens if a group pauses. Kolo explores encoding a subset of those rules in a Soroban contract so that token movement and group state can be checked on Stellar instead of relying only on an off-chain database.
+Rotating savings groups depend on clear rules: who can join, how much members contribute, whose turn comes next, and what happens if a group pauses. Rotula explores encoding a subset of those rules in a Soroban contract so that token movement and group state can be checked on Stellar instead of relying only on an off-chain database.
 
 ```text
-WhatsApp conversations        Kolo backend               Stellar / Soroban
+WhatsApp conversations        Rotula backend               Stellar / Soroban
 group coordination    ─────►   member + group records ──► configured token
 reminders and help              authorization             contract state/events
                                 RPC + confirmation          contributions/payouts
@@ -31,12 +62,12 @@ The intended savings asset is **USDC on Stellar**, but this contract does not ha
 
 ## Contract behavior
 
-The `KoloSavingsContract` supports two group types:
+The `RotulaSavingsContract` supports two group types:
 
-| Group type | Contribution behavior | Outgoing funds |
-| --- | --- | --- |
-| `Rotational` | A member must contribute the configured amount once per cycle. The member count is frozen on the first contribution in a cycle. | An administrator-authorized call pays the next member in contract order, using the configured contribution amount multiplied by the frozen member count. |
-| `GoalBased` | A member-authorized contribution may be any positive amount. | A member can withdraw from their recorded savings, subject to available contract tokens and any configured target lock. Rotational payout is unavailable. |
+| Group type   | Contribution behavior                                                                                                           | Outgoing funds                                                                                                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Rotational` | A member must contribute the configured amount once per cycle. The member count is frozen on the first contribution in a cycle. | An administrator-authorized call pays the next member in contract order, using the configured contribution amount multiplied by the frozen member count.  |
+| `GoalBased`  | A member-authorized contribution may be any positive amount.                                                                    | A member can withdraw from their recorded savings, subject to available contract tokens and any configured target lock. Rotational payout is unavailable. |
 
 Additional controls include:
 
@@ -96,6 +127,22 @@ The contract checks that the next expected member matches the requested recipien
 
 Because the contract's pool accounting, contribution readiness, and backend payout lifecycle must work together, treat these rules as code under development. Review and test the full lifecycle before deploying a public instance.
 
+## Prerequisites
+
+| Tool            | Version / Notes                                 | Install                                                                            |
+| --------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **Rust**        | stable, with the `wasm32v1-none` target         | https://rustup.rs                                                                  |
+| **Stellar CLI** | latest, for deploying and invoking the contract | `brew install stellar-cli` or [cargo/docs](https://github.com/stellar/stellar-cli) |
+| **Soroban SDK** | 27 (pinned in `contracts/Cargo.toml`)           | pulled by Cargo                                                                    |
+
+Verify your setup:
+
+```bash
+rustup target add wasm32v1-none
+rustc --version
+stellar --version
+```
+
 ## Build and test
 
 Requires Rust and the Wasm target:
@@ -113,11 +160,22 @@ cargo build --target wasm32v1-none --release
 
 The release Wasm artifact is written to `contracts/target/wasm32v1-none/release/`. This target is required by Soroban SDK 27 with current Rust toolchains; `wasm32-unknown-unknown` is rejected by the SDK on newer Rust versions.
 
-## Integration with Kolo
+## Integration with Rotula
 
-The [Kolo backend](https://github.com/Stellar-Kolo/kolo-backend) is responsible for loading the compiled Wasm, deploying contract instances, constructing and simulating Soroban transactions, obtaining authorization, submitting through Soroban RPC, and waiting for confirmation. It also needs to keep contract state and PostgreSQL records reconcilable. The [Kolo frontend](https://github.com/Stellar-Kolo/kolo-frontend) is the web companion; the planned primary member experience is WhatsApp-first.
+The [Rotula backend](https://github.com/Rotula-Labs/rotula-api) is responsible for loading the compiled Wasm, deploying contract instances, constructing and simulating Soroban transactions, obtaining authorization, submitting through Soroban RPC, and waiting for confirmation. It also needs to keep contract state and PostgreSQL records reconcilable. The [Rotula frontend](https://github.com/Rotula-Labs/rotula-app) is the web companion; the planned primary member experience is WhatsApp-first.
 
 Integration is still in progress. Before relying on a deployment, align the backend's ABI and membership lifecycle with this interface and verify asset address, issuer, amount precision, transaction authorization, payout readiness, errors, and recovery behavior together.
+
+## Environment Variables
+
+The contract itself reads no environment variables; Soroban contracts receive their configuration through `initialize`, not the host environment. The deployment script and CI read the following:
+
+| Variable                 | Used by                              | Purpose                                                          |
+| ------------------------ | ------------------------------------ | ---------------------------------------------------------------- |
+| `STELLAR_SOURCE_ACCOUNT` | `contracts/deploy.sh`, CI deploy job | Named Stellar identity (or public key) that signs the deployment |
+| `STELLAR_NETWORK`        | `contracts/deploy.sh`                | Target network (`testnet` by default)                            |
+
+Initialize-time arguments (**not** environment variables, but the asset and rules a group is created with) are `admin`, `token`, `name`, `contribution_amount`, `group_type`, `target_amount`, `lock_until_target`, and `expected_cycle_days`. See [Interface](#interface). Signing material lives in Stellar CLI secure storage, never in this repository.
 
 ## Security and network use
 
